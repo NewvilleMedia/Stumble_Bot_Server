@@ -8,6 +8,7 @@ from persona_config import (
 )
 from model_config import model
 from routes import router as api_router
+from engagement_prompts import get_engagement_prompt
 
 # --------------------------
 #  CONFIG
@@ -115,7 +116,7 @@ Final Output:
 # NORMAL BOT RESPONSE PROMPT
 # --------------------------
 
-def build_normal_prompt(bot_persona, event_type, event_data, context):
+def build_normal_prompt(bot_persona, event_type, event_data, context, engagement_context=None):
 
     username = event_data.get("username", "@User")
     event_rule = EVENT_GUIDELINES.get(
@@ -153,6 +154,22 @@ STRICT NON-NEGOTIABLE RULES:
 - Emotional events override personality (tone must soften).
 """
 
+    # Phase 4: Add relationship emphasis when detected
+    relationship_section = ""
+    if event_data.get("relationship_context"):
+        relationship_section = """
+RELATIONSHIP EMPHASIS (ACTIVATED):
+This message is about a relationship. You MUST:
+- Focus on attachment patterns, communication dynamics, and boundaries
+- Ask about what they need vs what they're tolerating
+- Frame everything through relational dynamics, not general advice
+- Explore the space between what they want and what they're getting
+- Help them see patterns in how they connect with others
+"""
+
+    # Phase 5: Add engagement loop instructions
+    engagement_section = get_engagement_prompt(engagement_context) if engagement_context else ""
+
     return f"""
 {bot_persona}
 
@@ -162,6 +179,8 @@ EVENT GOAL: {event_rule}
 USERNAME: {username}
 
 {user_message_section}
+{relationship_section}
+{engagement_section}
 
 CONTEXT:
 Recent Messages: {context.get("recent_messages", [])}
@@ -185,6 +204,7 @@ class BotEvent(BaseModel):
     event_type: str
     event_data: dict
     context: dict = {}
+    engagement_context: dict = None
     timestamp: Optional[str] = None
 
 
@@ -234,7 +254,8 @@ async def bot_event_handler(payload: BotEvent):
             bot_persona=persona,
             event_type=payload.event_type,
             event_data=payload.event_data,
-            context=payload.context
+            context=payload.context,
+            engagement_context=payload.engagement_context
         )
 
         print(f"Prompt DEBUGGING:\n{prompt}\n")

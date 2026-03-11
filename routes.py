@@ -15,6 +15,8 @@ router = APIRouter()
 
 class BotRequestModel(BaseModel):
     user_input: str
+    relationship_context: bool = False
+    engagement_context: dict = None
 
 
 
@@ -40,29 +42,29 @@ async def routes_info():
 
 @router.post("/chat/sara")
 async def chat_sara(user_input: BotRequestModel = None):
-    return {"response": sara(user_input.user_input)}
+    return {"response": sara(user_input.user_input, relationship_context=user_input.relationship_context, engagement_context=user_input.engagement_context)}
 
 
 @router.post("/chat/red")
 async def chat_red(user_input: BotRequestModel = None):
-    return {"response": red(user_input.user_input)}
+    return {"response": red(user_input.user_input, relationship_context=user_input.relationship_context, engagement_context=user_input.engagement_context)}
 
 
 @router.post("/chat/blue")
 async def chat_blue(user_input: BotRequestModel = None):
-    return {"response": blue(user_input.user_input)}
+    return {"response": blue(user_input.user_input, relationship_context=user_input.relationship_context, engagement_context=user_input.engagement_context)}
 
 
 @router.post("/chat/white")
 async def chat_white(user_input: BotRequestModel = None):
-    return {"response": white(user_input.user_input)}
+    return {"response": white(user_input.user_input, relationship_context=user_input.relationship_context, engagement_context=user_input.engagement_context)}
 
 
 @router.post("/chat/yellow")
 async def chat_yellow(user_input: BotRequestModel = None):
-    return {"response": yellow(user_input.user_input)}
+    return {"response": yellow(user_input.user_input, relationship_context=user_input.relationship_context, engagement_context=user_input.engagement_context)}
 
 
 @router.post("/chat/joe")
 async def chat_joe(user_input: BotRequestModel = None):
-    return {"response": joe(user_input.user_input)}
+    return {"response": joe(user_input.user_input, relationship_context=user_input.relationship_context, engagement_context=user_input.engagement_context)}
