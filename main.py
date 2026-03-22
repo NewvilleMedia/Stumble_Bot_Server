@@ -5,6 +5,7 @@ from typing import Optional
 from persona_config import (
     BOT_PERSONAS,
     EVENT_GUIDELINES,
+    POETRY_RULE,
 )
 from model_config import model
 from routes import router as api_router
@@ -170,6 +171,26 @@ This message is about a relationship. You MUST:
     # Phase 5: Add engagement loop instructions
     engagement_section = get_engagement_prompt(engagement_context) if engagement_context else ""
 
+    # Phase 6: Style instruction (from Django backend)
+    style_section = ""
+    if event_data.get('style_instruction'):
+        style_section = f"""
+RESPONSE STYLE:
+{event_data['style_instruction']}
+You MUST include poetic, symbolic, or mythic language in at least one line of your response.
+"""
+
+    # Phase 6: Time of day context
+    time_section = ""
+    time_of_day = event_data.get('time_of_day', '')
+    if time_of_day:
+        time_prompts = {
+            'morning': 'It is morning. Set a grounding, intentional tone. Help them start their day with presence.',
+            'afternoon': 'It is afternoon. Invite reflection. Help them check in with themselves mid-day.',
+            'evening': 'It is evening. Encourage integration. Help them process and settle from the day.',
+        }
+        time_section = f"\nTIME CONTEXT: {time_prompts.get(time_of_day, '')}\n"
+
     return f"""
 {bot_persona}
 
@@ -181,6 +202,8 @@ USERNAME: {username}
 {user_message_section}
 {relationship_section}
 {engagement_section}
+{style_section}
+{time_section}
 
 CONTEXT:
 Recent Messages: {context.get("recent_messages", [])}
@@ -188,6 +211,8 @@ Current User: {context.get("current_user", {})}
 Tribe Mood: {context.get("tribe_mood", {})}
 
 {STRICT_RULES}
+
+{POETRY_RULE}
 
 Write ONE short response following all rules.
 
@@ -204,7 +229,11 @@ class BotEvent(BaseModel):
     event_type: str
     event_data: dict
     context: dict = {}
-    engagement_context: dict = None
+    engagement_context: Optional[dict] = None
+    response_style: Optional[dict] = None
+    style_instruction: Optional[str] = None
+    time_of_day: Optional[str] = None
+    tier: Optional[str] = None
     timestamp: Optional[str] = None
 
 
@@ -230,10 +259,23 @@ async def bot_event_handler(payload: BotEvent):
     persona = BOT_PERSONAS[bot_name]
 
     # ---------------------
+    # 0. MERGE NEW FIELDS INTO EVENT_DATA
+    # ---------------------
+    event_data = payload.event_data.copy()
+    if payload.response_style and 'response_style' not in event_data:
+        event_data['response_style'] = payload.response_style
+    if payload.style_instruction and 'style_instruction' not in event_data:
+        event_data['style_instruction'] = payload.style_instruction
+    if payload.time_of_day and 'time_of_day' not in event_data:
+        event_data['time_of_day'] = payload.time_of_day
+    if payload.tier and 'tier' not in event_data:
+        event_data['tier'] = payload.tier
+
+    # ---------------------
     # 1. EXTRACT ALL TEXT FOR SAFETY CHECK
     # ---------------------
     all_texts = []
-    all_texts.extend(extract_all_text(payload.event_data))
+    all_texts.extend(extract_all_text(event_data))
     all_texts.extend(extract_all_text(payload.context))
     
     combined_text = " ".join(all_texts)
@@ -245,7 +287,7 @@ async def bot_event_handler(payload: BotEvent):
     # ---------------------
     if llm_self_harm_check(combined_text):
         print("⚠️ SAFETY OVERRIDE TRIGGERED - Self-harm detected")
-        prompt = build_safety_prompt(payload.event_data.get("username", "@User"))
+        prompt = build_safety_prompt(event_data.get("username", "@User"))
     else:
         # ---------------------
         # 3. NORMAL MODE
@@ -253,7 +295,7 @@ async def bot_event_handler(payload: BotEvent):
         prompt = build_normal_prompt(
             bot_persona=persona,
             event_type=payload.event_type,
-            event_data=payload.event_data,
+            event_data=event_data,
             context=payload.context,
             engagement_context=payload.engagement_context
         )

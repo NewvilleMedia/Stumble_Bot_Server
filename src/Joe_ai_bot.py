@@ -1,4 +1,4 @@
-from persona_config import JOE_SYSTEM_PROMPT
+from persona_config import JOE_SYSTEM_PROMPT, POETRY_RULE
 from model_config import model
 from engagement_prompts import get_engagement_prompt
 
@@ -24,6 +24,13 @@ def joe(user_input, relationship_context=False, engagement_context=None):
     if engagement_section:
         system_prompt += engagement_section
         print(f"🎮 Engagement L{engagement_context.get('stretch_level', 1)} for Joe")
+
+    # Style instruction from engagement_context
+    if engagement_context and engagement_context.get('style_instruction'):
+        system_prompt += f"\nRESPONSE STYLE:\n{engagement_context['style_instruction']}\nYou MUST include poetic, symbolic, or mythic language in at least one line of your response.\n"
+
+    # Always include poetry/voice depth rule
+    system_prompt += POETRY_RULE
 
     try:
         response = model.chat.completions.create(

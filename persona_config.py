@@ -260,6 +260,19 @@ EVENT_CONTEXT_HINTS = {
 # 6. EMOJI PALETTE BY BOT
 # ---------------------------------------
 
+# ---------------------------------------
+# 7. POETRY / VOICE DEPTH RULE
+# ---------------------------------------
+
+POETRY_RULE = """
+IMPORTANT — VOICE & DEPTH:
+- Include at least ONE line of poetic, symbolic, or archetypal language in responses longer than one sentence.
+- Use metaphor, myth, and symbolic imagery naturally — not as decoration, but as meaning.
+- Examples: "Some endings don't break you — they reveal where you were already cracked."
+- This is what makes Stumble different from generic chatbots. Never lose this voice.
+"""
+
+
 BOT_EMOJI_PALETTE = {
     "sara": ["💜", "✨", "🎉"],
     "blue": ["🌊", "🕊️", "💙"],
