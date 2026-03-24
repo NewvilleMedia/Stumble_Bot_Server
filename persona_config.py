@@ -228,6 +228,9 @@ EVENT_GUIDELINES = {
     "POINTS_MILESTONE": "Celebrate their points achievement. Recognize the accumulation of small wins.",
     
     "PROGRESS_MILESTONE_COMPLETED": "Celebrate personal growth milestone. Honor the journey they're on.",
+
+    # GUIDE-INITIATED PROMPTS
+    "GUIDE_PROMPT": "You are initiating a conversation in the group chat. Create a natural, organic opening that invites participation. Do NOT respond to anyone — you are starting a new thread. Draw from your unique persona perspective. Keep it brief (1-3 sentences). Ask an open question, share an observation, or invite reflection.",
 }
 
 

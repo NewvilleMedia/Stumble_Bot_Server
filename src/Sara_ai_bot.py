@@ -31,6 +31,7 @@ def sara(user_input, relationship_context=False, engagement_context=None):
 
     # Always include poetry/voice depth rule
     system_prompt += POETRY_RULE
+    system_prompt += "\n\nTARGETING RULE: You are responding to exactly ONE user message. Never reference multiple users, summarize a thread, or address the group. Respond directly and personally to the specific message you receive."
 
     try:
         response = model.chat.completions.create(

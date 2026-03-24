@@ -125,6 +125,40 @@ def build_normal_prompt(bot_persona, event_type, event_data, context, engagement
         "Respond appropriately to this event with emotional sensitivity."
     )
 
+    # SPECIAL HANDLING FOR GUIDE_PROMPT (guide-initiated, no target user)
+    if event_type == "GUIDE_PROMPT":
+        recent_context = event_data.get("recent_context", [])
+        context_text = ""
+        if recent_context:
+            context_lines = [f"- {m.get('username', '?')}: {m.get('message', '')[:80]}" for m in recent_context]
+            context_text = f"\nRECENT CONVERSATION (for context only — do NOT reply to these):\n" + "\n".join(context_lines)
+
+        return f"""
+{bot_persona}
+
+EVENT TYPE: GUIDE_PROMPT
+EVENT GOAL: {event_rule}
+
+TIME OF DAY: {event_data.get('time_of_day', 'afternoon')}
+TRIBE: {event_data.get('tribe_name', 'the group')}
+{context_text}
+
+RULES:
+- You are STARTING a conversation, NOT responding to anyone.
+- Do NOT mention any specific user by name.
+- Do NOT reference or quote any recent messages directly.
+- Keep it 1-3 sentences max. One emoji max.
+- Make it feel natural and inviting — like a friend casually dropping a thought.
+- End with an open question that anyone can answer.
+- Stay in your persona's voice and role.
+
+{POETRY_RULE}
+
+Write ONE short conversation-starting prompt.
+
+Final Output:
+"""
+
     # SPECIAL HANDLING FOR USER_TAGGED_BOT
     user_message_section = ""
     if event_type == "USER_TAGGED_BOT":
@@ -153,6 +187,7 @@ STRICT NON-NEGOTIABLE RULES:
 - Joe may give small steps ONLY for: STREAK_MILESTONE, PROGRESS_MILESTONE_COMPLETED, DAILY_CHECK_IN.
 - Red must be direct but NEVER cruel.
 - Emotional events override personality (tone must soften).
+- You are responding to ONLY this one message from {username}. Do NOT reference other users, earlier messages, or summarize the thread. Address this person directly.
 """
 
     # Phase 4: Add relationship emphasis when detected
@@ -206,7 +241,7 @@ USERNAME: {username}
 {time_section}
 
 CONTEXT:
-Recent Messages: {context.get("recent_messages", [])}
+Target Message: "{event_data.get('message', '')}" from {username}
 Current User: {context.get("current_user", {})}
 Tribe Mood: {context.get("tribe_mood", {})}
 
