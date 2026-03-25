@@ -178,7 +178,6 @@ YOU MUST:
     STRICT_RULES = f"""
 STRICT NON-NEGOTIABLE RULES:
 - Response MUST be 1-4 sentences ONLY.
-- MUST be under 280 characters.
 - MUST mention {username}.
 - Never start with username in sentence.
 - Use MAX 1 emoji.
