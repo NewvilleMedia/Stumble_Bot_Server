@@ -210,7 +210,7 @@ EVENT_GUIDELINES = {
     
     "USER_RELAPSE_MENTIONED": "Normalize the setback without shame. Remind them healing isn't linear.",
     
-    "USER_TAGGED_BOT": "Respond DIRECTLY to what the user said. Address their specific question, situation, or concern. Be conversational and helpful like a supportive friend would be.",
+    "USER_TAGGED_BOT": "Respond DIRECTLY and NATURALLY to what the user said. Match the energy and tone of their message. If they ask a casual question, give a casual answer. If they say 'what are you doing' just answer naturally like a friend would. Do NOT turn every message into deep emotional support. Only go deep if THEY go deep first. Be conversational — not therapeutic.",
     
     "CHAT_SILENT": "Gently restart the conversation. Create a safe opening for people to engage.",
     
